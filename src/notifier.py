@@ -1,5 +1,5 @@
 """
-macOS notification handler using AppleScript
+macOS notification handler using terminal-notifier for notification center
 """
 
 import subprocess
@@ -8,6 +8,9 @@ from pathlib import Path
 from typing import Optional, Callable
 
 logger = logging.getLogger(__name__)
+
+# Path to terminal-notifier binary
+TERMINAL_NOTIFIER = "/opt/homebrew/bin/terminal-notifier"
 
 
 class NotificationManager:
@@ -25,28 +28,23 @@ class NotificationManager:
 
     def send_notification(self) -> bool:
         """
-        Send persistent notification that Claude has asked a question
+        Send notification to macOS notification center (top-right corner)
 
         Returns:
             True if notification sent successfully
         """
         try:
-            # Use AppleScript dialog for persistence - user clicks to dismiss
-            script = '''
-            display alert "Claude Code" message "Claude has asked a question" buttons {"OK"} default button "OK"
-            '''
-
+            # Check if terminal-notifier is available
             result = subprocess.run(
-                ["osascript", "-e", script],
+                [TERMINAL_NOTIFIER, "-title", "Claude Code", "-message", "Claude has asked a question", "-timeout", "0"],
                 capture_output=True,
                 timeout=5,
                 check=False
             )
 
             if result.returncode == 0:
-                logger.info("Notification sent successfully (AppleScript dialog)")
+                logger.info("Notification sent successfully (notification center)")
                 self.notification_sent = True
-                # Dialog requires user interaction, so no need for separate focus
                 return True
             else:
                 logger.error(f"Failed to send notification: {result.stderr.decode()}")
