@@ -35,7 +35,7 @@ class NotificationManager:
             try:
                 result = subprocess.run(
                     [
-                        "/usr/local/bin/terminal-notifier",
+                        "/opt/homebrew/bin/terminal-notifier",
                         "-title", "Claude Code",
                         "-message", "Claude has asked a question",
                         "-group", "com.nudge.claude",
