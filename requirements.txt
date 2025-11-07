@@ -1,6 +1,3 @@
-# Core dependencies
-pync>=2.0.0
-
 # Config (Python 3.11+ has tomllib built-in)
 tomli>=2.0.0 ; python_version < '3.11'
 toml>=0.10.2
