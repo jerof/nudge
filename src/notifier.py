@@ -9,58 +9,50 @@ from typing import Optional, Callable
 
 logger = logging.getLogger(__name__)
 
+try:
+    import pync
+    PYNC_AVAILABLE = True
+except ImportError:
+    PYNC_AVAILABLE = False
+    logger.warning("pync not installed - notifications will not work")
+
 
 class NotificationManager:
     """Sends macOS notifications when Claude asks questions"""
-    
+
     def __init__(self, focus_command: Optional[str] = None):
         """
         Initialize notification manager
-        
+
         Args:
             focus_command: Command to execute when notification is clicked
         """
         self.focus_command = focus_command
         self.notification_sent = False
-    
+
     def send_notification(self) -> bool:
         """
         Send notification that Claude has asked a question
-        
+
         Returns:
             True if notification sent successfully
         """
-        try:
-            cmd = [
-                "python3",
-                "-m", "pync",
-                "Claude has asked a question",
-                "-t", "Claude Code",
-                "-g", "com.nudge.claude"  # Group for deduplication
-            ]
-            
-            # Add click action if command provided
-            if self.focus_command:
-                cmd.extend(["-e", self.focus_command])
-            
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                timeout=5,
-                check=False
-            )
-            
-            if result.returncode == 0:
-                logger.info("Notification sent successfully")
-                self.notification_sent = True
-                return True
-            else:
-                logger.error(f"Failed to send notification: {result.stderr.decode()}")
-                return False
-        
-        except subprocess.TimeoutExpired:
-            logger.error("Notification command timed out")
+        if not PYNC_AVAILABLE:
+            logger.error("pync not available - please install it with: pip install pync")
             return False
+
+        try:
+            # Use pync library directly
+            pync.notify(
+                "Claude has asked a question",
+                title="Claude Code",
+                group="com.nudge.claude"
+            )
+
+            logger.info("Notification sent successfully")
+            self.notification_sent = True
+            return True
+
         except Exception as e:
             logger.error(f"Error sending notification: {e}")
             return False
