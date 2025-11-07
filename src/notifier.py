@@ -37,11 +37,13 @@ class NotificationManager:
             # Command to run when notification is clicked - focus the IDE/terminal
             focus_command = 'osascript -e \'tell application "Ghostty" to activate\' 2>/dev/null || osascript -e \'tell application "iTerm" to activate\''
 
-            # Build notification command with improved visibility
+            # Build notification command with action button
             cmd = [
                 TERMINAL_NOTIFIER,
                 "-title", "Claude Code",
+                "-subtitle", "Click to view terminal",
                 "-message", "Claude has asked a question",
+                "-actions", "View",
                 "-sound", "Glass",  # Add sound to make it more noticeable
                 "-ignoreDnD",  # Bypass Do Not Disturb
                 "-execute", focus_command  # Run focus command when clicked
