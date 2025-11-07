@@ -34,9 +34,21 @@ class NotificationManager:
             True if notification sent successfully
         """
         try:
-            # Check if terminal-notifier is available
+            # Command to run when notification is clicked - focus the IDE/terminal
+            focus_command = 'osascript -e \'tell application "Ghostty" to activate\' 2>/dev/null || osascript -e \'tell application "iTerm" to activate\''
+
+            # Build notification command with improved visibility
+            cmd = [
+                TERMINAL_NOTIFIER,
+                "-title", "Claude Code",
+                "-message", "Claude has asked a question",
+                "-sound", "Glass",  # Add sound to make it more noticeable
+                "-ignoreDnD",  # Bypass Do Not Disturb
+                "-execute", focus_command  # Run focus command when clicked
+            ]
+
             result = subprocess.run(
-                [TERMINAL_NOTIFIER, "-title", "Claude Code", "-message", "Claude has asked a question", "-timeout", "0"],
+                cmd,
                 capture_output=True,
                 timeout=5,
                 check=False
