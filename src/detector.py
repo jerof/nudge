@@ -29,20 +29,20 @@ class QuestionDetector:
     
     def detect(self, line: str) -> bool:
         """
-        Check if a line contains AskUserQuestion indicator
-        
+        Check if a line contains AskUserQuestion indicator or a question
+
         Returns:
             True if line indicates Claude is asking a question
         """
         if not line or not line.strip():
             return False
-        
-        # Try pattern matching
+
+        # Try pattern matching for AskUserQuestion tool
         for pattern in self.PATTERNS:
             if re.search(pattern, line, re.IGNORECASE | re.MULTILINE):
                 logger.debug(f"Detected pattern: {pattern}")
                 return True
-        
+
         # Try JSON parsing
         try:
             data = json.loads(line)
@@ -54,7 +54,16 @@ class QuestionDetector:
                     return True
         except json.JSONDecodeError:
             pass
-        
+
+        # Detect conversational questions (lines ending with ?)
+        # Skip short lines and common non-question patterns
+        stripped = line.strip()
+        if stripped.endswith('?') and len(stripped) > 5:
+            # Skip lines that are just symbols or formatting
+            if not re.match(r'^[>\-\*\s]+\?$', stripped):
+                logger.debug(f"Detected conversational question")
+                return True
+
         return False
     
     def should_ignore_line(self, line: str) -> bool:
