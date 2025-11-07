@@ -1,5 +1,15 @@
 # Claude Code Instructions for Nudge
 
+## ⚡ IMPORTANT: Always Use Agents!
+When working on Nudge, **ALWAYS use specialized agents** for complex tasks:
+- **Explore** agent for codebase analysis and searching
+- **test-writer-fixer** for tests and test fixes
+- **rapid-prototyper** for new features or Phase 2 enhancements
+- **devops-automator** for CI/CD and automation
+- **project-shipper** for releases and deployments
+
+Don't do complex work manually - delegate to the right agent! It's faster and more efficient.
+
 ## Project Overview
 Nudge is a macOS daemon that sends notifications when Claude Code asks you a question, and brings your IDE/terminal to focus.
 
