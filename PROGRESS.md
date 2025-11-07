@@ -29,16 +29,20 @@
 
 ## 🔄 In Progress / Next Steps
 
-### Phase 2 Enhancements - Multi-Terminal Support (IN PROGRESS)
-- [ ] Capture terminal ID/window in shell wrapper
-- [ ] Store terminal metadata with each question
-- [ ] Extract terminal ID in detector
-- [ ] Switch to correct terminal when notification clicked
-- [ ] Test with multiple Ghostty windows
+### Phase 2 Enhancements - Multi-Terminal Support (PLANNING → IMPLEMENTATION)
+- [ ] **STEP 1:** Capture terminal ID/window in shell wrapper (~/.bashrc, ~/.zshrc)
+- [ ] **STEP 2:** Update detector to extract terminal ID
+- [ ] **STEP 3:** Update daemon to pass terminal ID through flow
+- [ ] **STEP 4:** Update notifier to use terminal ID in notifications
+- [ ] **STEP 5:** Test with multiple Ghostty windows
+- [ ] Update LEARNING.md with Level 11 (implementation details)
+- [ ] Update all documentation with new terminal ID approach
 
 **Why this matters:** Right now, if you have 10 terminals running Claude, clicking the notification might activate the wrong one. Phase 2 will fix this so it always goes to the correct terminal.
 
-**Learning resource:** See LEARNING.md Levels 7-10 for full technical explanation!
+**Detailed Plan:** See **[ROADMAP.md](ROADMAP.md)** for complete step-by-step implementation guide with code examples and design decisions.
+
+**Learning resource:** See LEARNING.md Levels 7-10 for technical explanation, then Levels 11+ during implementation!
 
 ### Future Phase 2 Features (Post-Multi-Terminal)
 - [ ] Add response buttons directly to notifications (Yes/No, multiple choice)
