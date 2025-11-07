@@ -1,5 +1,5 @@
 """
-macOS notification handler using pync
+macOS notification handler using AppleScript
 """
 
 import subprocess
@@ -8,13 +8,6 @@ from pathlib import Path
 from typing import Optional, Callable
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pync
-    PYNC_AVAILABLE = True
-except ImportError:
-    PYNC_AVAILABLE = False
-    logger.warning("pync not installed - notifications will not work")
 
 
 class NotificationManager:
@@ -32,26 +25,33 @@ class NotificationManager:
 
     def send_notification(self) -> bool:
         """
-        Send notification that Claude has asked a question
+        Send notification that Claude has asked a question using AppleScript
 
         Returns:
             True if notification sent successfully
         """
-        if not PYNC_AVAILABLE:
-            logger.error("pync not available - please install it with: pip install pync")
-            return False
-
         try:
-            # Use pync library directly
-            pync.notify(
-                "Claude has asked a question",
-                title="Claude Code",
-                group="com.nudge.claude"
+            # Use AppleScript directly for better compatibility
+            script = '''
+            display notification "Claude has asked a question" with title "Claude Code"
+            '''
+
+            result = subprocess.run(
+                ["osascript", "-e", script],
+                capture_output=True,
+                timeout=5,
+                check=False
             )
 
-            logger.info("Notification sent successfully")
-            self.notification_sent = True
-            return True
+            if result.returncode == 0:
+                logger.info("Notification sent successfully")
+                self.notification_sent = True
+                # Immediately bring IDE to focus when notification is sent
+                self.focus_ide()
+                return True
+            else:
+                logger.error(f"Failed to send notification: {result.stderr.decode()}")
+                return False
 
         except Exception as e:
             logger.error(f"Error sending notification: {e}")
