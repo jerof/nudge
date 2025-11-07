@@ -19,7 +19,7 @@
 
 ### Technical Stack
 - Python 3.8+
-- pync for macOS notifications
+- AppleScript/osascript for persistent macOS notifications (dialog alerts)
 - File-based log monitoring
 - AppleScript/osascript for window management
 - launchd for background service
@@ -57,11 +57,12 @@
 - Full CLI management
 - Comprehensive documentation
 
-**Last Tested:** November 7, 2025
-- Question detection: ✅ Working
-- Notification sending: ✅ Working
-- Window focus: ✅ Working (Ghostty confirmed)
+**Last Tested:** November 7, 2025 (22:26 UTC)
+- Question detection: ✅ Working (conversational and tool-based)
+- Notification sending: ✅ Working (AppleScript dialog - persistent)
+- Window focus: ✅ Working (Ghostty confirmed, tries iTerm/Terminal/VS Code/Cursor)
 - Logs: ✅ Clear and informative
+- Daemon status: ✅ Running as background service
 
 ---
 
@@ -86,10 +87,11 @@ python -m src.cli logs
 
 ## 📋 Known Limitations
 
-1. **No GitHub repo yet** - Code only locally stored
+1. **GitHub authentication pending** - SSH key not configured for jerof account
 2. **Phase 1 only** - No response buttons in notifications yet
 3. **Log file based** - Relies on piping Claude Code output to `~/.nudge/claude.log`
 4. **macOS only** - Uses native macOS features (launchd, AppleScript)
+5. **Notification position** - AppleScript dialog appears center screen (most reliable method)
 
 ---
 
