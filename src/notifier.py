@@ -34,10 +34,8 @@ class NotificationManager:
             True if notification sent successfully
         """
         try:
-            # Command to run when notification is clicked - focus the IDE/terminal
-            focus_command = 'osascript -e \'tell application "Ghostty" to activate\' 2>/dev/null || osascript -e \'tell application "iTerm" to activate\''
-
-            # Build notification command with action button
+            # Build notification command with Ghostty activation
+            # When user clicks "View", Ghostty will come to focus
             cmd = [
                 TERMINAL_NOTIFIER,
                 "-title", "Claude Code",
@@ -46,7 +44,7 @@ class NotificationManager:
                 "-actions", "View",
                 "-sound", "Glass",  # Add sound to make it more noticeable
                 "-ignoreDnD",  # Bypass Do Not Disturb
-                "-execute", focus_command  # Run focus command when clicked
+                "-activate", "com.mitchellh.ghostty"  # Activate Ghostty when clicked
             ]
 
             result = subprocess.run(
