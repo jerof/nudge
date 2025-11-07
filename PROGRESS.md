@@ -19,7 +19,7 @@
 
 ### Technical Stack
 - Python 3.8+
-- AppleScript/osascript for persistent macOS notifications (dialog alerts)
+- terminal-notifier for macOS notification center (top-right corner)
 - File-based log monitoring
 - AppleScript/osascript for window management
 - launchd for background service
@@ -57,9 +57,9 @@
 - Full CLI management
 - Comprehensive documentation
 
-**Last Tested:** November 7, 2025 (22:26 UTC)
+**Last Tested:** November 7, 2025 (22:31 UTC)
 - Question detection: ✅ Working (conversational and tool-based)
-- Notification sending: ✅ Working (AppleScript dialog - persistent)
+- Notification sending: ✅ Working (terminal-notifier, top-right corner)
 - Window focus: ✅ Working (Ghostty confirmed, tries iTerm/Terminal/VS Code/Cursor)
 - Logs: ✅ Clear and informative
 - Daemon status: ✅ Running as background service
@@ -90,8 +90,7 @@ python -m src.cli logs
 1. **GitHub authentication pending** - SSH key not configured for jerof account
 2. **Phase 1 only** - No response buttons in notifications yet
 3. **Log file based** - Relies on piping Claude Code output to `~/.nudge/claude.log`
-4. **macOS only** - Uses native macOS features (launchd, AppleScript)
-5. **Notification position** - AppleScript dialog appears center screen (most reliable method)
+4. **macOS only** - Uses terminal-notifier and launchd (Apple-specific)
 
 ---
 
