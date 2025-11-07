@@ -31,30 +31,7 @@ class NotificationManager:
             True if notification sent successfully
         """
         try:
-            # Try terminal-notifier first (persistent, doesn't auto-dismiss)
-            try:
-                result = subprocess.run(
-                    [
-                        "/opt/homebrew/bin/terminal-notifier",
-                        "-title", "Claude Code",
-                        "-message", "Claude has asked a question",
-                        "-group", "com.nudge.claude",
-                        "-timeout", "0"  # Stay until user clicks or dismisses
-                    ],
-                    capture_output=True,
-                    timeout=5,
-                    check=False
-                )
-
-                if result.returncode == 0:
-                    logger.info("Notification sent successfully (terminal-notifier)")
-                    self.notification_sent = True
-                    self.focus_ide()
-                    return True
-            except FileNotFoundError:
-                logger.debug("terminal-notifier not found, falling back to AppleScript")
-
-            # Fallback: Use AppleScript with a dialog for persistence
+            # Use AppleScript dialog for persistence - user clicks to dismiss
             script = '''
             display alert "Claude Code" message "Claude has asked a question" buttons {"OK"} default button "OK"
             '''
@@ -69,7 +46,7 @@ class NotificationManager:
             if result.returncode == 0:
                 logger.info("Notification sent successfully (AppleScript dialog)")
                 self.notification_sent = True
-                self.focus_ide()
+                # Dialog requires user interaction, so no need for separate focus
                 return True
             else:
                 logger.error(f"Failed to send notification: {result.stderr.decode()}")
