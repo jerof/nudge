@@ -29,7 +29,18 @@
 
 ## 🔄 In Progress / Next Steps
 
-### Phase 2 Enhancements (Planned)
+### Phase 2 Enhancements - Multi-Terminal Support (IN PROGRESS)
+- [ ] Capture terminal ID/window in shell wrapper
+- [ ] Store terminal metadata with each question
+- [ ] Extract terminal ID in detector
+- [ ] Switch to correct terminal when notification clicked
+- [ ] Test with multiple Ghostty windows
+
+**Why this matters:** Right now, if you have 10 terminals running Claude, clicking the notification might activate the wrong one. Phase 2 will fix this so it always goes to the correct terminal.
+
+**Learning resource:** See LEARNING.md Levels 7-10 for full technical explanation!
+
+### Future Phase 2 Features (Post-Multi-Terminal)
 - [ ] Add response buttons directly to notifications (Yes/No, multiple choice)
 - [ ] Question preview text in notification
 - [ ] Multiple question queue UI
@@ -66,6 +77,25 @@
 
 ---
 
+## 🎓 Learning Approach
+
+**Want to understand how Nudge works?** Start with `LEARNING.md`!
+
+This guide uses a **Socratic method** - teaching from high-level concepts to deep technical details with quiz questions to confirm understanding:
+
+```bash
+# Read the learning guide
+cat LEARNING.md
+
+# It covers:
+# Level 1-2: Big picture and simple flow
+# Level 3-4: Components and data flow
+# Level 5-6: Code structure and technologies
+# Level 7-10: Multi-terminal challenge and deep technical details
+```
+
+Each section includes quiz questions - try to answer before looking at the answer! No rush, pause and restart whenever.
+
 ## 🚀 Usage
 
 ```bash
@@ -81,9 +111,21 @@ python -m src.cli status
 
 # View logs
 python -m src.cli logs
+
+# Learn how it works
+cat LEARNING.md
 ```
 
 ---
+
+## 📚 Documentation
+
+- **README.md** - Project overview and features
+- **QUICKSTART.md** - 5-minute setup guide
+- **INSTALLATION.md** - Detailed installation and troubleshooting
+- **LEARNING.md** - **NEW!** Socratic learning guide covering all concepts from high-level to deep technical details with quiz questions
+- **claude.md** - Architecture decisions and code organization
+- **BUGS.md** - Known issues and limitations
 
 ## 📋 Known Limitations
 
@@ -91,6 +133,7 @@ python -m src.cli logs
 2. **Phase 1 only** - No response buttons in notifications yet
 3. **Log file based** - Relies on piping Claude Code output to `~/.nudge/claude.log`
 4. **macOS only** - Uses terminal-notifier and launchd (Apple-specific)
+5. **Multi-terminal support** - Currently focuses app but not specific window/tab (Phase 2 in progress)
 
 ---
 
