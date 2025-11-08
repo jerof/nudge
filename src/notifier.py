@@ -25,15 +25,24 @@ class NotificationManager:
         """
         self.focus_command = focus_command
         self.notification_sent = False
+        self.last_terminal_id: Optional[str] = None
 
-    def send_notification(self) -> bool:
+    def send_notification(self, terminal_id: Optional[str] = None) -> bool:
         """
         Send notification to macOS notification center (top-right corner)
+
+        Args:
+            terminal_id: Terminal identifier for grouping notifications (e.g., term-1762552270-33202-29167).
+                        If provided, notifications will be grouped by terminal session.
 
         Returns:
             True if notification sent successfully
         """
         try:
+            # Store terminal_id for later use in focus_ide
+            if terminal_id:
+                self.last_terminal_id = terminal_id
+
             # Build notification command with Ghostty activation
             # When user clicks "View", Ghostty will come to focus
             cmd = [
@@ -47,6 +56,10 @@ class NotificationManager:
                 "-activate", "com.mitchellh.ghostty"  # Activate Ghostty when clicked
             ]
 
+            # Add group flag if terminal_id is provided to group notifications by terminal session
+            if terminal_id:
+                cmd.extend(["-group", terminal_id])
+
             result = subprocess.run(
                 cmd,
                 capture_output=True,
@@ -55,7 +68,7 @@ class NotificationManager:
             )
 
             if result.returncode == 0:
-                logger.info("Notification sent successfully (notification center)")
+                logger.info(f"Notification sent successfully (notification center){' for terminal ' + terminal_id if terminal_id else ''}")
                 self.notification_sent = True
                 return True
             else:
@@ -65,18 +78,26 @@ class NotificationManager:
         except Exception as e:
             logger.error(f"Error sending notification: {e}")
             return False
-    
-    def focus_ide(self) -> bool:
+
+    def focus_ide(self, terminal_id: Optional[str] = None) -> bool:
         """
         Bring IDE/terminal to focus
-        
+
+        Args:
+            terminal_id: Terminal identifier for targeting specific terminal window.
+                        If provided, can be used for more precise window targeting.
+
         Returns:
             True if focus command succeeded
         """
+        # Store terminal_id for potential future use
+        if terminal_id:
+            self.last_terminal_id = terminal_id
+
         terminals = ["Ghostty", "iTerm", "Terminal"]
         ides = ["Code", "Cursor"]
         app_names = terminals + ides
-        
+
         for app in app_names:
             try:
                 script = f'tell application "{app}" to activate'
@@ -86,13 +107,13 @@ class NotificationManager:
                     timeout=2,
                     check=False
                 )
-                
+
                 if result.returncode == 0:
-                    logger.info(f"Brought {app} to focus")
+                    logger.info(f"Brought {app} to focus{' (terminal: ' + terminal_id + ')' if terminal_id else ''}")
                     return True
             except Exception as e:
                 logger.debug(f"Failed to focus {app}: {e}")
                 continue
-        
+
         logger.error("Could not bring any IDE/terminal to focus")
         return False

@@ -46,12 +46,12 @@ class ClaudeMonitorDaemon:
         elapsed = (datetime.now() - self.last_notification).total_seconds()
         return elapsed >= self.notification_cooldown
 
-    def _process_log_file(self, log_path: Path) -> bool:
+    def _process_log_file(self, log_path: Path) -> Optional[str]:
         """
         Check for new lines in log file that indicate a question
 
         Returns:
-            True if question detected
+            Terminal ID if question detected, None otherwise
         """
         try:
             current_size = log_path.stat().st_size
@@ -61,15 +61,17 @@ class ClaudeMonitorDaemon:
             if current_size < last_pos:
                 last_pos = 0
 
-            question_detected = False
+            detected_terminal_id = None
 
             with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
                 f.seek(last_pos)
 
                 for line in f:
                     if self.detector.detect(line):
-                        logger.info(f"Question detected in {log_path}")
-                        question_detected = True
+                        # Extract terminal ID from the line
+                        terminal_id = self.detector.extract_terminal_id(line)
+                        logger.info(f"Question detected in {log_path} from terminal: {terminal_id}")
+                        detected_terminal_id = terminal_id
 
                     # Stop after reading enough lines (efficiency)
                     if self.detector.should_ignore_line(line):
@@ -78,14 +80,14 @@ class ClaudeMonitorDaemon:
                 # Update position
                 self.file_positions[log_path] = f.tell()
 
-            return question_detected
+            return detected_terminal_id
 
         except FileNotFoundError:
             logger.debug(f"Log file not found: {log_path}")
-            return False
+            return None
         except Exception as e:
             logger.error(f"Error reading {log_path}: {e}")
-            return False
+            return None
 
     def check_logs(self) -> bool:
         """
@@ -103,14 +105,15 @@ class ClaudeMonitorDaemon:
             return False
 
         for log_path in log_paths:
-            if self._process_log_file(log_path):
+            terminal_id = self._process_log_file(log_path)
+            if terminal_id is not None:
                 # Question detected, send notification if cooldown allows
                 if self._should_notify():
-                    if self.notifier.send_notification():
+                    if self.notifier.send_notification(terminal_id=terminal_id):
                         self.last_notification = datetime.now()
                         # Try to focus IDE immediately on next iteration
                         time.sleep(0.1)
-                        self.notifier.focus_ide()
+                        self.notifier.focus_ide(terminal_id=terminal_id)
                     return True
 
         return False

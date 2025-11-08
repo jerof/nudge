@@ -29,12 +29,12 @@
 
 ## 🔄 In Progress / Next Steps
 
-### Phase 2 Enhancements - Multi-Terminal Support (PLANNING → IMPLEMENTATION)
-- [ ] **STEP 1:** Capture terminal ID/window in shell wrapper (~/.bashrc, ~/.zshrc)
-- [ ] **STEP 2:** Update detector to extract terminal ID
-- [ ] **STEP 3:** Update daemon to pass terminal ID through flow
-- [ ] **STEP 4:** Update notifier to use terminal ID in notifications
-- [ ] **STEP 5:** Test with multiple Ghostty windows
+### Phase 2 Enhancements - Multi-Terminal Support (IMPLEMENTATION COMPLETE ✅)
+- [x] **STEP 1:** Capture terminal ID/window in shell wrapper (~/.bashrc, ~/.zshrc)
+- [x] **STEP 2:** Update detector to extract terminal ID
+- [x] **STEP 3:** Update daemon to pass terminal ID through flow
+- [x] **STEP 4:** Update notifier to use terminal ID in notifications
+- [x] **STEP 5:** Test with multiple Ghostty windows
 - [ ] Update LEARNING.md with Level 11 (implementation details)
 - [ ] Update all documentation with new terminal ID approach
 
@@ -72,12 +72,15 @@
 - Full CLI management
 - Comprehensive documentation
 
-**Last Tested:** November 7, 2025 (22:31 UTC)
+**Last Tested:** November 8, 2025 (08:59 UTC)
 - Question detection: ✅ Working (conversational and tool-based)
-- Notification sending: ✅ Working (terminal-notifier, top-right corner)
-- Window focus: ✅ Working (Ghostty confirmed, tries iTerm/Terminal/VS Code/Cursor)
-- Logs: ✅ Clear and informative
+- Multi-terminal support: ✅ WORKING! (Terminal IDs extracted and tracked correctly)
+- Notification sending: ✅ Working with terminal ID grouping (`-group` flag)
+- Notification grouping: ✅ Working (notifications grouped by terminal ID)
+- Window focus: ✅ Working with terminal ID logging
+- Logs: ✅ Clear and informative (includes terminal ID for debugging)
 - Daemon status: ✅ Running as background service
+- Test results: ✅ Successfully detected 3 simultaneous questions from different terminals
 
 ---
 
@@ -134,10 +137,10 @@ cat LEARNING.md
 ## 📋 Known Limitations
 
 1. **GitHub authentication pending** - SSH key not configured for jerof account
-2. **Phase 1 only** - No response buttons in notifications yet
+2. **Phase 2 features pending** - No response buttons in notifications yet (Phase 3)
 3. **Log file based** - Relies on piping Claude Code output to `~/.nudge/claude.log`
 4. **macOS only** - Uses terminal-notifier and launchd (Apple-specific)
-5. **Multi-terminal support** - Currently focuses app but not specific window/tab (Phase 2 in progress)
+5. **Terminal ID session-specific** - If terminal closes and reopens, gets new ID (expected behavior, old notifications become orphaned)
 
 ---
 

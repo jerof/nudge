@@ -421,6 +421,187 @@ Why? Because the detector reads from the log file, which gets written by the she
 
 ---
 
+## Level 11: Implementation - Terminal ID Tracking (Complete ✅)
+
+### What We Built
+
+You now have a fully working multi-terminal tracking system! Here's how each step connected:
+
+### STEP 1: Shell Function Wrapper
+```bash
+claude() {
+  TERM_ID="term-$(date +%s)-$-$RANDOM"
+  /path/to/claude "$@" | awk -v id="$TERM_ID" '{print "[TERM:" id "] " $0}' | tee ~/.nudge/claude.log
+}
+```
+
+**What happens:**
+- Every line from Claude gets prefixed with `[TERM:unique-id]`
+- Example output: `[TERM:term-1762552270-33202-29167] Claude: Should I use React?`
+
+---
+
+### STEP 2: Detector Extraction
+```python
+def extract_terminal_id(self, line: str) -> Optional[str]:
+    match = re.search(r'\[TERM:([^\]]+)\]', line)
+    if match:
+        return match.group(1)  # "term-1762552270-33202-29167"
+    return None
+```
+
+**What happens:**
+- Detector reads log line with prefix
+- Uses regex to extract terminal ID
+- Returns the ID: `term-1762552270-33202-29167`
+
+---
+
+### STEP 3: Daemon Threading
+```python
+def _process_log_file(self, log_path: Path) -> Optional[str]:
+    # ... check for question ...
+    if detector.detect(line):
+        terminal_id = detector.extract_terminal_id(line)
+        return terminal_id  # Return the ID instead of just True
+```
+
+**What happens:**
+- Daemon loops through log file
+- When question found, extracts terminal ID
+- Passes ID to notifier: `send_notification(terminal_id=terminal_id)`
+
+---
+
+### STEP 4: Notifier Grouping
+```python
+def send_notification(self, terminal_id: Optional[str] = None) -> bool:
+    cmd = [
+        TERMINAL_NOTIFIER,
+        "-title", "Claude Code",
+        "-activate", "com.mitchellh.ghostty",
+        "-group", terminal_id  # Group by terminal ID
+    ]
+```
+
+**What happens:**
+- Notification gets sent with `-group` flag
+- All notifications from same terminal grouped together
+- Logging includes terminal ID for debugging
+
+---
+
+### STEP 5: Testing the Full Flow
+
+**Test Setup:** Added 3 questions with different terminal IDs
+```bash
+echo "[TERM:term-1762552270-33202-29167] Claude: Should I use function A or B?" >> ~/.nudge/claude.log
+echo "[TERM:term-1762552271-33203-29168] Claude: Is this approach correct?" >> ~/.nudge/claude.log
+echo "[TERM:term-1762552272-33204-29169] Claude: What's the best practice here?" >> ~/.nudge/claude.log
+```
+
+**Results:** All 3 questions detected with correct terminal IDs:
+```
+Question detected... from terminal: term-1762552270-33202-29167
+Question detected... from terminal: term-1762552271-33203-29168
+Question detected... from terminal: term-1762552272-33204-29169
+
+Notification sent successfully for terminal term-1762552272-33204-29169
+Brought Ghostty to focus (terminal: term-1762552272-33204-29169)
+```
+
+✅ **All terminal IDs tracked correctly!**
+
+---
+
+### Quiz 11: Multi-Terminal Implementation
+
+**Question 1:** If you have 5 Ghostty windows open, and Claude asks a question in window #3, what information does the daemon log when it detects the question?
+
+<details>
+<summary>Click to see answer</summary>
+
+**Answer:** The daemon logs both:
+1. That a question was detected
+2. The terminal ID that was extracted from the log line
+
+Example: `"Question detected... from terminal: term-1762552270-33202-29167"`
+
+This ID came from the shell function that prefixed the Claude output.
+
+</details>
+
+---
+
+**Question 2:** Why is the `-group` flag important in the terminal-notifier command?
+
+<details>
+<summary>Click to see answer</summary>
+
+**Answer:** The `-group` flag tells macOS to group all notifications from the same terminal session together. This means:
+- If terminal #1 asks 3 questions, they're grouped together (not 3 separate notifications)
+- If terminal #2 asks questions, they're in a separate group
+- User can see which notifications came from which terminal
+
+This reduces notification spam and makes it easier to manage multiple parallel Claude sessions.
+
+</details>
+
+---
+
+**Question 3:** What happens if a question doesn't have a `[TERM:xxx]` prefix in the log line?
+
+<details>
+<summary>Click to see answer</summary>
+
+**Answer:** The `extract_terminal_id()` function returns `None`, and the terminal_id stays optional throughout the system:
+- Detector still detects the question ✅
+- Daemon still passes it to notifier (but with `terminal_id=None`)
+- Notifier still sends notification (just without the `-group` flag)
+- System continues to work in "legacy mode" without terminal tracking
+
+This ensures backward compatibility - old logs without terminal IDs still work!
+
+</details>
+
+---
+
+### How Everything Connects
+
+```
+Shell Wrapper
+    ↓
+[TERM:ID] Claude: Question?
+    ↓
+Daemon reads log
+    ↓
+Detector finds question AND extracts ID
+    ↓
+Daemon passes (question, terminal_id) to notifier
+    ↓
+Notifier sends notification with `-group terminal_id`
+    ↓
+Notification appears (grouped by terminal)
+    ↓
+User clicks notification
+    ↓
+Focus command includes terminal ID in logging
+    ↓
+Ghostty comes to focus
+```
+
+---
+
+### Key Learning Points
+
+1. **Terminal Identity:** Unique ID per terminal session ensures we can distinguish between parallel instances
+2. **Layered Extraction:** Each component (shell → detector → daemon → notifier) handles one piece
+3. **Backward Compatibility:** System works with or without terminal IDs (graceful degradation)
+4. **Notification Grouping:** `-group` flag provides UX benefit (organized notifications)
+5. **Metadata Threading:** Terminal ID flows through entire system, enabling precise targeting
+
+---
+
 ## Next Steps
 
 You now understand:
