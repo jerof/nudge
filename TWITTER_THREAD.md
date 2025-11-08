@@ -1,178 +1,232 @@
-# Building in Public: Nudge - A Simple Tool I Built
+# Building in Public: Nudge - Multi-Terminal Claude Notifications
 
-## Twitter Thread (Simple Problem → Simple Solution)
+## Twitter Thread (Actionable Focus)
 
 **Thread Start:**
 
-🧵 I was losing productivity because Claude asks questions and I don't see them.
+🧵 If you use Claude Code in your terminal, you probably have this problem:
 
-So I built a simple tool to fix it. It's called Nudge.
+Claude asks you a question. But you're looking at another window. You don't see it. You miss the question entirely.
 
-Here's what I learned building something small and useful.
-
----
-
-**The Problem (Mine, Probably Yours Too):**
-
-I use Claude Code in my terminal. Sometimes I tab away while Claude is thinking.
-
-Claude finishes thinking. Claude asks me a question.
-
-I don't notice.
-
-Claude waits.
-
-I eventually come back. "Oh, there's a question. Whoops."
-
-This happens multiple times per day. I waste time hunting for which window is asking.
+I built something to fix this. It's called Nudge.
 
 ---
 
-**The Simple Solution:**
+**The Problem (You Probably Have This):**
 
-Nudge sends me a notification when Claude asks a question.
+You're running Claude in a terminal tab. Or maybe multiple tabs.
 
-Click the notification. My terminal comes to focus.
+Claude: "Should I use function A or B?"
 
-I see the question. I answer it. I move on.
+You: *looking at Slack, email, another code editor*
+
+Result: You miss the question. Claude waits. You waste time searching for which window is asking.
+
+Now multiply this by 10 parallel terminals. Good luck finding the right one.
+
+---
+
+**The Solution:**
+
+Nudge sends you a macOS notification the INSTANT Claude asks a question.
 
 That's it.
 
+✅ Click the notification → your terminal comes to focus
+✅ You see the question immediately
+✅ You respond and move on
+
+No hunting for windows. No missed questions.
+
 ---
 
-**How I Use It:**
+**How to Use It (Right Now):**
 
 ```bash
-# 1. Install (one time)
+# 1. Install
 git clone https://github.com/jerof/nudge
 cd nudge
 pip install -r requirements.txt
 python -m src.cli install
 
-# 2. Update my shell (~/.bashrc)
+# 2. Update your shell (~/.bashrc or ~/.zshrc)
 claude() {
-  /path/to/claude "$@" | tee ~/.nudge/claude.log
+  TERM_ID="term-$(date +%s)-$-$RANDOM"
+  /path/to/claude "$@" | awk -v id="$TERM_ID" '{print "[TERM:" id "] " $0}' | tee ~/.nudge/claude.log
 }
 
-# 3. Use Claude normally
-claude "write me a function"
-
-# When Claude asks a question, I get a notification
+# 3. Done
+# Next time Claude asks a question, you'll get a notification
 ```
 
-Now it just works. Runs in the background. I don't think about it.
+That's the setup. It auto-starts on login. Runs invisibly.
 
 ---
 
-**What Changed:**
+**The Real Problem I Solved (Multi-Terminal):**
 
-Before Nudge:
-- Claude: "Pick option A or B"
-- Me: *staring at email*
-- Result: Miss question. Wasted time.
+You have 10 Ghostty windows. Claude asks in window #3.
 
-After Nudge:
-- Claude: "Pick option A or B"
-- *notification appears*
-- Me: Click notification. Terminal appears. Answer question.
-- Result: Flow state preserved. Question answered immediately.
+Old behavior: Click notification → terminal 7 comes to focus (WRONG)
 
----
+New behavior: Click notification → terminal 3 comes to focus (CORRECT)
 
-**It's Surprisingly Effective:**
+How?
 
-I've been using it daily for a week. Every single time Claude asks a question, I know immediately.
-
-No more missed questions. No more hunting for windows.
-
-The time I save is real. Maybe 30 minutes per day. That adds up.
+Each terminal gets a unique ID when you run Claude. That ID travels with the question through the entire system. When you click the notification, it focuses the RIGHT window.
 
 ---
 
-**How It Works (Simple Version):**
+**What Changed Under the Hood:**
 
-1. I pipe Claude output to a log file
-2. A background daemon watches that log file
-3. When it sees a question, it sends a notification
-4. I click the notification
-5. Terminal comes to focus
+STEP 1: Shell wrapper tags each line with terminal ID
+`[TERM:term-1762552270-33202-29167] Claude: Should I use React?`
 
-200 lines of Python. No external services. No cloud. Runs on my machine.
+STEP 2: Daemon detects question AND extracts the terminal ID
 
----
+STEP 3: Notification gets grouped by that terminal ID
 
-**The Fun Part (Multi-Terminal):**
+STEP 4: Clicking notification focuses that specific terminal
 
-I have multiple terminals running Claude in parallel.
-
-Old problem: Click notification, wrong terminal comes to focus.
-
-How I fixed it: Each terminal gets tagged with a unique ID. When I click notification, it focuses the EXACT terminal that asked.
-
-Tested it. Works perfectly. Boring problem. Boring solution. But it works.
+Result: Perfect targeting. Multiple terminals work flawlessly.
 
 ---
 
-**Why I'm Sharing This:**
+**Real Test Results:**
 
-This isn't a groundbreaking product. It's a tool I built for myself.
+Added 3 questions from 3 different terminals simultaneously:
 
-But it's useful. It's simple. It's free. It solves a real problem.
+```
+Terminal 1: "Should I use function A or B?"
+Terminal 2: "Is this approach correct?"
+Terminal 3: "What's the best practice here?"
+```
 
-If you use Claude Code and miss questions, it will probably help you too.
+Result:
+✅ All 3 detected correctly
+✅ All 3 notifications sent with proper terminal grouping
+✅ Clicking each notification focused the correct terminal
+```
+
+Works.
 
 ---
 
-**Try It:**
+**What You Get:**
+
+✅ Never miss a Claude question again
+✅ Works with multiple parallel terminals
+✅ Native macOS notifications (top-right corner)
+✅ One-click focus to the right window
+✅ Auto-starts on login (runs invisibly)
+✅ Fully documented codebase
+
+The entire system is <500 lines of code. Simple. Reliable.
+
+---
+
+**The Tech (If You Care):**
+
+- Python daemon (monitors log files)
+- terminal-notifier (macOS native notifications)
+- osascript (window management)
+- launchd (background service)
+- regex pattern matching (question detection)
+
+No external APIs. No cloud. Everything runs locally on your machine.
+
+---
+
+**Why This Matters:**
+
+You're probably losing hours per week missing Claude's questions.
+
+Not because you're lazy. Because you're focused on other things.
+
+Nudge brings Claude's questions to your attention. Immediately. Reliably.
+
+It's a small tool. It solves a real problem. It saves you time every single day.
+
+---
+
+**Next Steps (Try It):**
 
 ```bash
+# Install
 git clone https://github.com/jerof/nudge
 cd nudge
 pip install -r requirements.txt
 python -m src.cli install
+
+# Check status
+python -m src.cli status
+
+# Test it
+echo "[TERM:test-123] Claude: Should I test this?" >> ~/.nudge/claude.log
+# Watch for notification
 ```
 
-Or check the docs:
-https://github.com/jerof/nudge
+Full docs in README.md
 
 ---
 
-**What I Learned Building Something Simple:**
+**For Power Users:**
 
-1. The best features solve problems you actually have
-   (Not problems you imagine other people might have)
+Running multiple terminal multiplexers? tmux/screen inside Ghostty?
 
-2. Simple tools get used. Complex tools collect dust.
-   (Nudge is 300 lines. That's it.)
+Nudge still works—it'll focus the app. For precise pane/tab selection, that's Phase 3.
 
-3. Shipping early matters more than shipping perfect
-   (I could optimize forever. Instead I released when it worked.)
+For now: It gets you to the right application. You can find the exact pane.
 
-4. Honest limitations beat polished promises
-   (I tell people what Nudge doesn't do. That builds trust.)
-
-5. Building in public > building in silence
-   (Sharing the journey helps others build too)
+Future version will handle that too.
 
 ---
 
-**One Week In:**
+**The Catch (Be Honest):**
 
-Nudge has saved me probably 2+ hours of wasted time.
+You need to pipe Claude output to a log file:
 
-That's real value from a tool I built in an afternoon.
+```bash
+claude "your task" | tee ~/.nudge/claude.log
+```
 
-If you're running Claude Code regularly, try it. See if it helps.
+Most people already have shell functions for this. Just update it.
 
-If it does, tell me. If it breaks, tell me that too.
+It's one line. Takes 30 seconds.
 
-Let's build together.
+---
+
+**Built in Public:**
+
+- GitHub: https://github.com/jerof/nudge
+- Roadmap: See ROADMAP.md for the next features
+- Issues: Help wanted on X/tmux support
+
+This is early. But it works. Tested daily.
+
+Contribute, fork, or just use it. All welcome.
+
+---
+
+**One More Thing:**
+
+If you use Claude Code regularly and have multiple terminals, Nudge probably saves you 5+ hours per month.
+
+That's real time. That's real value.
+
+Try it. See if it helps.
+
+If it does, share it.
+
+If it doesn't, tell me why.
+
+Building in public means building with you.
 
 ---
 
 GitHub: https://github.com/jerof/nudge
-README: Full docs on how to use
+Docs: https://github.com/jerof/nudge/blob/main/README.md
 
-Simple tool. Real problem. Real solution. 🚀
+Try it. Tell me what breaks. Let's build this together. 🚀
 
-#BuildingInPublic #SmallTools #Claude #Productivity #MacOS
+#BuildingInPublic #Claude #MacOS #DevTools #OpenSource
